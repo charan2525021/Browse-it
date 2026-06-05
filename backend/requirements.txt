@@ -1,0 +1,45 @@
+# ============================================================
+# Browser Use Backend Requirements
+# Python 3.14+ install order matters — run install.bat instead
+# of plain `pip install -r requirements.txt`
+# ============================================================
+
+# --- Core API ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.0
+websockets>=12.0
+
+# --- Pre-install these FIRST on Python 3.14 (binary wheels only) ---
+# pip install zstandard --only-binary=:all:
+# pip install cffi --only-binary=:all:
+# pip install "langsmith>=0.4.0"
+
+# --- Browser Use (install with --no-deps then add missing) ---
+# pip install "browser-use==0.1.48" --no-deps
+psutil
+playwright
+posthog
+pyperclip
+json-repair
+
+# --- LangChain (pinned to versions compatible with langchain-core 0.3.x / browser-use 0.1.48) ---
+langchain-core>=0.3.49,<0.4.0
+langchain-openai>=0.3.0,<0.4.0
+langchain-anthropic>=0.3.0,<0.4.0
+langchain-google-genai>=2.0.0,<3.0.0
+langchain-mistralai==0.2.4
+langchain-community==0.3.20
+langchain_mcp_adapters==0.0.9
+langgraph==0.3.34
+langgraph-checkpoint==2.0.25
+
+# --- Extras ---
+MainContentExtractor==0.0.4
+# langchain-ibm excluded: requires Python <3.14
+
+langchain-ollama>=0.1.0,<0.3.0
+langchain-aws>=0.1.0,<0.3.0
+
+langchain>=0.3.0,<0.4.0

@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply scroll-smooth; }
+  body {
+    @apply font-sans antialiased;
+    background-color: #F0EBE2;
+    color: #442D11;
+  }
+  .dark body, html.dark body {
+    background-color: #141413;
+    color: #FFFFFF;
+  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full; background: #D4C9B8; }
+  .dark ::-webkit-scrollbar-thumb { background: #2A2A28; }
+  ::-webkit-scrollbar-thumb:hover { background: #B8A994; }
+}
+
+@layer utilities {
+  .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+  .animate-slide-up { animation: slideUp 0.4s ease-out; }
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-spin-slow { animation: spin 30s linear infinite; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
