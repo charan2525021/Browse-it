@@ -10,8 +10,8 @@ import json
 
 logger = logging.getLogger(__name__)
 
-# Ensure parent src/ is importable
-_root = os.path.join(os.path.dirname(__file__), "..", "..")
+# Ensure backend/ (which contains the src package) is importable
+_root = os.path.join(os.path.dirname(__file__), "..")
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
@@ -128,10 +128,13 @@ class AgentService:
             from src.controller.custom_controller import CustomController
             from src.agent.browser_use.browser_use_agent import BrowserUseAgent
 
-            # Enhance task with structured-output guidance for extraction tasks
+            # Enhance task with output guidance based on intent
             task_text = request.task
+            lower_task = request.task.lower()
             extract_keywords = ("extract", "list", "table", "scrape", "collect", "get all", "fetch all", "find all", "gather")
-            if any(kw in request.task.lower() for kw in extract_keywords):
+            summarize_keywords = ("summarize", "summary", "summarise", "explain", "describe", "analyze", "analyse", "tell me about", "what is", "what are")
+
+            if any(kw in lower_task for kw in extract_keywords):
                 task_text = (
                     f"{request.task}\n\n"
                     "IMPORTANT OUTPUT INSTRUCTIONS: When you finish, use the 'done' action and return "
@@ -139,6 +142,14 @@ class AgentService:
                     "Each object should represent one item with consistent keys (e.g. name, price, rating, url). "
                     "Extract ALL matching items found on the page, not just a few. "
                     "If the user asked for a specific format, still include the raw JSON data so it can be rendered as a table."
+                )
+            elif any(kw in lower_task for kw in summarize_keywords):
+                task_text = (
+                    f"{request.task}\n\n"
+                    "IMPORTANT OUTPUT INSTRUCTIONS: After gathering the page content, do NOT just copy the raw text. "
+                    "In your final 'done' action, write an ORIGINAL, well-structured SUMMARY in your own words "
+                    "that directly answers the user's request. Keep it concise (3-6 sentences or bullet points), "
+                    "capture the key facts, and make it readable. The 'text' field of the done action must contain the summary, not the raw extracted content."
                 )
 
             llm = get_llm_model(
@@ -346,10 +357,13 @@ class AgentService:
             from src.utils.llm_provider import get_llm_model
             from src.agent.deep_research.deep_research_agent import DeepResearchAgent
 
+            # Deep research relies heavily on function/tool calling. Many providers
+            # (especially Groq) fail tool calls at high temperature, so cap it low.
+            research_temp = min(request.llm.temperature, 0.2)
             llm = get_llm_model(
                 provider=request.llm.provider,
                 model_name=request.llm.model_name,
-                temperature=request.llm.temperature,
+                temperature=research_temp,
                 base_url=request.llm.base_url,
                 api_key=request.llm.api_key,
                 num_ctx=request.llm.num_ctx,
@@ -449,10 +463,34 @@ class AgentService:
             self._status = "stopped"
             await self._emit({"type": "status", "status": "stopped"})
         except Exception as e:
-            self._error = str(e)
+            msg = str(e)
+            # Detect Groq/provider tool-calling failures and give actionable guidance
+            if "tool_use_failed" in msg or "Failed to call a function" in msg or "invalid_request_error" in msg:
+                msg = (
+                    "Deep Research needs reliable function/tool calling, which the current "
+                    f"model ({request.llm.model_name}) doesn't handle well.\n\n"
+                    "Recommended fixes:\n"
+                    "• Use OpenAI gpt-4o or Anthropic Claude (best tool-calling), or\n"
+                    "• On Groq, try 'llama-3.3-70b-versatile' with Temperature set to 0, or\n"
+                    "• Use the Browser Agent mode instead for single-site research.\n\n"
+                    f"Original error: {str(e)[:200]}"
+                )
+            elif "rate_limit" in msg or "429" in msg or "tokens per day" in msg:
+                msg = (
+                    "⏳ Rate limit reached on your LLM provider.\n\n"
+                    "Deep Research uses a LOT of tokens (it spawns many browser sub-tasks). "
+                    "You've hit the daily token limit.\n\n"
+                    "Options:\n"
+                    "• Wait for the limit to reset (Groq free tier resets daily), or\n"
+                    "• Upgrade your Groq plan, or\n"
+                    "• Switch to a different provider (OpenAI/Anthropic) in Settings, or\n"
+                    "• Use Browser Agent mode which uses far fewer tokens.\n\n"
+                    f"Provider message: {str(e)[:250]}"
+                )
+            self._error = msg
             self._status = "error"
             logger.exception("Deep research error")
-            await self._emit({"type": "error", "message": str(e)})
+            await self._emit({"type": "error", "message": msg})
         finally:
             self._is_running = False
             self._agent = None
