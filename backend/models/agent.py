@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel
+from pydantic import BaseModel
 from typing import Optional, List, Any
 from enum import Enum
 
@@ -31,6 +31,9 @@ class AgentConfig(BaseModel):
     tool_calling_method: str = "auto"
     max_input_tokens: int = 128000
     enable_recording: bool = False
+    enable_planning: bool = True
+    max_failures: int = 5
+    max_research_iterations: int = 3
 
 class AgentRunRequest(BaseModel):
     task: str

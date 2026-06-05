@@ -4,6 +4,7 @@ import { useAgentStore } from '@/store/agentStore'
 import BrowserView from '@/components/browser/BrowserView'
 import AgentStepList from '@/components/agent/AgentStepList'
 import AgentResultView from '@/components/agent/AgentResultView'
+import PlanView from '@/components/agent/PlanView'
 import type { AgentType } from '@/types/agent'
 
 function AutoResizeTextarea({ value, onChange, onSubmit, placeholder, disabled }: {
@@ -104,6 +105,7 @@ export default function AgentPage() {
             <div className="xl:col-span-3 min-h-0 overflow-hidden"><BrowserView /></div>
             <div className="xl:col-span-2 flex flex-col gap-4 min-h-0 overflow-hidden">
               <AgentResultView />
+              <PlanView />
               {steps.length > 0 && (
                 <div className="flex-1 min-h-0 bg-cream-50 dark:bg-night-light rounded-2xl border border-cream-300 dark:border-night-lighter p-4 overflow-hidden flex flex-col shadow-sm">
                   <div className="flex items-center justify-between mb-3 shrink-0"><h3 className="text-sm font-semibold text-bark dark:text-white">Steps</h3><span className="text-xs font-medium text-gold bg-gold/10 px-2 py-1 rounded-md">{steps.length}</span></div>

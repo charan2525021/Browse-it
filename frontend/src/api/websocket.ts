@@ -4,6 +4,7 @@ export type AgentEvent =
   | { type: 'agent_output'; result: string }
   | { type: 'error'; message: string }
   | { type: 'status'; status: string }
+  | { type: 'plan'; steps: string[] }
   | { type: 'ping' }
 
 type EventHandler = (event: AgentEvent) => void

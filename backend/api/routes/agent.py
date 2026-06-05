@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.agent import AgentRunRequest, AgentRunResponse, AgentStatus
 from core.dependencies import get_agent_service
 
@@ -42,4 +42,5 @@ async def get_history():
         "steps": [s.model_dump() for s in svc._steps],
         "result": svc._result,
         "status": svc._status,
+        "plan": svc._plan,
     }

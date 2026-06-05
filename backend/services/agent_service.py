@@ -15,7 +15,7 @@ _root = os.path.join(os.path.dirname(__file__), "..", "..")
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
-from models.agent import AgentRunRequest, AgentStatus, AgentStep
+from models.agent import AgentRunRequest, AgentStatus, AgentStep, AgentType
 
 class AgentService:
     def __init__(self):
@@ -29,6 +29,7 @@ class AgentService:
         self._steps: list[AgentStep] = []
         self._result: Optional[str] = None
         self._error: Optional[str] = None
+        self._plan: list[str] = []
         self._event_queue: asyncio.Queue = asyncio.Queue()
         self._browser = None
         self._browser_context = None
@@ -58,8 +59,13 @@ class AgentService:
         self._steps = []
         self._result = None
         self._error = None
+        self._plan = []
 
-        self._task = asyncio.create_task(self._run_agent(request))
+        # Route to the appropriate agent type
+        if request.agent_type == AgentType.DEEP_RESEARCH:
+            self._task = asyncio.create_task(self._run_deep_research(request))
+        else:
+            self._task = asyncio.create_task(self._run_agent(request))
         return task_id
 
     async def stop(self):
@@ -144,6 +150,20 @@ class AgentService:
                 num_ctx=request.llm.num_ctx,
             )
 
+            # ── PLANNING: generate and stream an explicit plan before browsing ──
+            if request.agent.enable_planning:
+                try:
+                    self._status = "planning"
+                    await self._emit({"type": "status", "status": "planning"})
+                    from services.planner_service import generate_plan
+                    self._plan = await generate_plan(llm, request.task)
+                    await self._emit({"type": "plan", "steps": self._plan})
+                    logger.info(f"Generated plan with {len(self._plan)} steps")
+                except Exception as e:
+                    logger.warning(f"Planning step skipped: {e}")
+                self._status = "running"
+                await self._emit({"type": "status", "status": "running"})
+
             # Browser settings come from the request (frontend Settings → Browser)
             from browser_use.browser.context import BrowserContextConfig as BUContextConfig
 
@@ -185,6 +205,8 @@ class AgentService:
                 max_actions_per_step=request.agent.max_actions_per_step,
                 tool_calling_method=request.agent.tool_calling_method,
                 max_input_tokens=request.agent.max_input_tokens,
+                max_failures=request.agent.max_failures,  # Resilience: tolerate more failures
+                retry_delay=5,  # Wait before retrying a failed step
                 enable_memory=False,  # Disable mem0 - it requires OPENAI_API_KEY for embeddings
             )
             # Get reference to the context after agent creates it
@@ -313,3 +335,124 @@ class AgentService:
         finally:
             self._is_running = False
             await self._cleanup()
+
+    async def _run_deep_research(self, request: AgentRunRequest):
+        """
+        Deep Research agent: orchestrates multiple browser sub-tasks across the web,
+        plans research sub-questions, executes them, and synthesizes a final report.
+        This covers multi-step orchestration across services + planning + synthesis.
+        """
+        try:
+            from src.utils.llm_provider import get_llm_model
+            from src.agent.deep_research.deep_research_agent import DeepResearchAgent
+
+            llm = get_llm_model(
+                provider=request.llm.provider,
+                model_name=request.llm.model_name,
+                temperature=request.llm.temperature,
+                base_url=request.llm.base_url,
+                api_key=request.llm.api_key,
+                num_ctx=request.llm.num_ctx,
+            )
+
+            # Planning stage
+            self._status = "planning"
+            await self._emit({"type": "status", "status": "planning"})
+            try:
+                from services.planner_service import generate_plan
+                self._plan = await generate_plan(llm, request.task)
+                await self._emit({"type": "plan", "steps": self._plan})
+            except Exception as e:
+                logger.warning(f"Deep research planning skipped: {e}")
+
+            self._status = "running"
+            await self._emit({"type": "status", "status": "running"})
+            await self._emit({
+                "type": "agent_step",
+                "step": 1,
+                "action": "🔬 Starting deep research",
+                "result": f"Researching: {request.task}",
+                "timestamp": datetime.now().isoformat(),
+            })
+
+            browser_config = {
+                "headless": True,  # Research runs many browsers - keep headless
+                "window_width": request.browser.window_width or 1280,
+                "window_height": request.browser.window_height or 1100,
+                "disable_security": request.browser.disable_security,
+            }
+
+            agent = DeepResearchAgent(
+                llm=llm,
+                browser_config=browser_config,
+                mcp_server_config=request.mcp_server_config,
+            )
+            self._agent = agent
+
+            # Stream a progress heartbeat while research runs
+            self._current_step = 1
+            heartbeat_step = {"n": 1}
+
+            async def _heartbeat():
+                while self._is_running:
+                    await asyncio.sleep(3)
+                    if not self._is_running:
+                        break
+                    heartbeat_step["n"] += 1
+                    self._current_step = heartbeat_step["n"]
+                    await self._emit({
+                        "type": "agent_step",
+                        "step": heartbeat_step["n"],
+                        "action": "🔍 Researching across sources",
+                        "result": "Gathering and analyzing information...",
+                        "timestamp": datetime.now().isoformat(),
+                    })
+
+            hb_task = asyncio.create_task(_heartbeat())
+
+            result = await agent.run(
+                topic=request.task,
+                task_id=self._task_id,
+                max_parallel_browsers=request.agent.max_research_iterations or 1,
+            )
+
+            hb_task.cancel()
+
+            # Extract the report from the result
+            report = ""
+            if isinstance(result, dict):
+                report = result.get("report") or result.get("final_report") or result.get("message") or ""
+                if not report and result.get("status") == "completed":
+                    report = "Research completed. See the generated report in ./tmp/deep_research/"
+            else:
+                report = str(result)
+
+            # Try to read the report file if present
+            try:
+                report_path = os.path.join("./tmp/deep_research", self._task_id or "", "report.md")
+                if os.path.exists(report_path):
+                    with open(report_path, "r", encoding="utf-8") as f:
+                        report = f.read()
+            except Exception:
+                pass
+
+            self._result = report or "Deep research finished."
+            self._status = "completed"
+            await self._emit({"type": "agent_output", "result": self._result})
+
+            try:
+                await agent.close_mcp_client()
+            except Exception:
+                pass
+
+        except asyncio.CancelledError:
+            self._status = "stopped"
+            await self._emit({"type": "status", "status": "stopped"})
+        except Exception as e:
+            self._error = str(e)
+            self._status = "error"
+            logger.exception("Deep research error")
+            await self._emit({"type": "error", "message": str(e)})
+        finally:
+            self._is_running = False
+            self._agent = None

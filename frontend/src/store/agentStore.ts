@@ -11,6 +11,7 @@ interface AgentState {
   task: string
   agentType: string
   startedAt: string | null
+  plan: string[]
   steps: AgentStep[]
   screenshot: string | null
   browserUrl: string
@@ -18,6 +19,7 @@ interface AgentState {
   error: string | null
   setStatus: (s: Partial<AgentStatus>) => void
   setTask: (task: string, agentType: string) => void
+  setPlan: (plan: string[]) => void
   addStep: (step: AgentStep) => void
   setScreenshot: (screenshot: string, url: string) => void
   setResult: (result: string) => void
@@ -35,6 +37,7 @@ export const useAgentStore = create<AgentState>((set) => ({
   task: '',
   agentType: 'browser_use',
   startedAt: null,
+  plan: [],
   steps: [],
   screenshot: null,
   browserUrl: '',
@@ -49,9 +52,10 @@ export const useAgentStore = create<AgentState>((set) => ({
     taskId: s.task_id ?? state.taskId,
   })),
   setTask: (task, agentType) => set({ task, agentType, startedAt: new Date().toISOString() }),
+  setPlan: (plan) => set({ plan }),
   addStep: (step) => set(s => ({ steps: [...s.steps, step], currentStep: step.step })),
   setScreenshot: (screenshot, url) => set({ screenshot, browserUrl: url }),
   setResult: (result) => set({ result, isRunning: false, status: 'completed' }),
   setError: (error) => set({ error, isRunning: false, status: 'error' }),
-  reset: () => set({ steps: [], screenshot: null, result: null, error: null, currentStep: 0, browserUrl: '' }),
+  reset: () => set({ steps: [], screenshot: null, result: null, error: null, currentStep: 0, browserUrl: '', plan: [] }),
 }))

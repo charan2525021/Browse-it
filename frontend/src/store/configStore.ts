@@ -16,7 +16,7 @@ export const useConfigStore = create<ConfigState>()(
     (set) => ({
       llm: { provider: 'groq', model_name: 'llama-3.3-70b-versatile', temperature: 1.0 },
       browser: { headless: false, disable_security: true, window_width: 1280, window_height: 1100, use_own_browser: false },
-      agent: { max_steps: 100, max_actions_per_step: 10, use_vision: false, tool_calling_method: 'auto', max_input_tokens: 128000, enable_recording: false },
+      agent: { max_steps: 100, max_actions_per_step: 10, use_vision: false, tool_calling_method: 'auto', max_input_tokens: 128000, enable_recording: false, enable_planning: true, max_failures: 5, max_research_iterations: 3 },
       setLLM: (c) => set(s => ({ llm: { ...s.llm, ...c } })),
       setBrowser: (c) => set(s => ({ browser: { ...s.browser, ...c } })),
       setAgent: (c) => set(s => ({ agent: { ...s.agent, ...c } })),

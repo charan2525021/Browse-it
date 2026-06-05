@@ -4,7 +4,7 @@ import { useAgentStore } from '@/store/agentStore'
 import { useHistoryStore } from '@/store/historyStore'
 
 export function useWebSocket() {
-  const { addStep, setScreenshot, setResult, setError, setStatus } = useAgentStore()
+  const { addStep, setScreenshot, setResult, setError, setStatus, setPlan } = useAgentStore()
 
   useEffect(() => {
     agentWS.connect()
@@ -43,7 +43,10 @@ export function useWebSocket() {
           saveToHistory('error', null, event.message)
           break
         case 'status':
-          setStatus({ status: event.status, is_running: event.status === 'running', is_paused: event.status === 'paused' })
+          setStatus({ status: event.status, is_running: event.status === 'running' || event.status === 'planning', is_paused: event.status === 'paused' })
+          break
+        case 'plan':
+          setPlan(event.steps)
           break
       }
     })

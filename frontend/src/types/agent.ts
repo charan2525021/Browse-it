@@ -26,6 +26,9 @@ export interface AgentConfig {
   tool_calling_method: string
   max_input_tokens: number
   enable_recording: boolean
+  enable_planning?: boolean
+  max_failures?: number
+  max_research_iterations?: number
 }
 
 export interface AgentRunRequest {
