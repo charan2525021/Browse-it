@@ -1,6 +1,11 @@
-# Browse-it
+# 🌈 Browse-it
 
-## What is Browse-it and what can we achieve with it?
+![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Automation](https://img.shields.io/badge/Automation-AI%20Browser%20Agent-FF6B35?style=for-the-badge&logo=googlechrome&logoColor=white)
+![LLM Ready](https://img.shields.io/badge/LLM-OpenAI%20%7C%20Azure%20%7C%20Google-7B61FF?style=for-the-badge&logo=openai&logoColor=white)
+
+## 🚀 What is Browse-it and what can we achieve with it?
 Browse-it is a web-based AI browser automation workspace with:
 - A FastAPI backend that runs an automation agent and streams live progress.
 - A React + Vite frontend where you configure models, browser behavior, and agent execution.
@@ -17,9 +22,9 @@ With this project, you can:
 <img width="1908" height="855" alt="image" src="https://github.com/user-attachments/assets/4a395686-85f1-47e2-8489-43f8d45bc6e1" />
 
 
-## How to install frontend and backend
+## 🛠️ How to install frontend and backend
 
-### Backend installation (Windows)
+### 🧩 Backend installation (Windows)
 1. Go to backend folder:
    ```powershell
    cd backend
@@ -32,6 +37,10 @@ With this project, you can:
 3. Install dependencies (recommended script for Python 3.14+):
    ```powershell
    install.bat
+   ```
+   or
+   ```powershell
+   pip install -r requirements.txt
    ```
 4. Install Playwright browser binaries:
    ```powershell
@@ -49,7 +58,7 @@ With this project, you can:
    RESOLUTION=1920x1080x24
    ```
 
-### Frontend installation
+### 🎨 Frontend installation
 1. Open a second terminal and go to frontend folder:
    ```powershell
    cd frontend
@@ -63,9 +72,9 @@ With this project, you can:
    $env:VITE_API_URL="http://localhost:8000"
    ```
 
-## How to start frontend and backend
+## ▶️ How to start frontend and backend
 
-### Start backend
+### 🔧 Start backend
 From backend folder with active venv:
 ```powershell
 python run.py
@@ -77,16 +86,16 @@ Alternative:
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### Start frontend
+### 💻 Start frontend
 From frontend folder:
 ```powershell
 npm run dev
 ```
 Frontend runs on http://localhost:5173.
 
-## Configuration settings (with recommendations)
+## ⚙️ Configuration settings (with recommendations)
 
-### LLM provider recommendation
+### 🧠 LLM provider recommendation
 If you want the most powerful and reliable model quality for complex browsing tasks:
 - OpenAI: best default quality/consistency for general use.
 - Azure OpenAI (Microsoft): best for enterprise governance, compliance, private networking, and production controls.
@@ -97,7 +106,7 @@ Practical recommendation:
 - Enterprise production environments: Azure OpenAI GPT-4o deployments.
 - Cost/speed-sensitive workloads: Google Gemini 2.0 Flash class models.
 
-### LLM settings (frontend)
+### 🔑 LLM settings (frontend)
 - Provider: selects the LLM backend (OpenAI, Anthropic, Google, Groq, DeepSeek, Ollama, Azure OpenAI, and others).
 - Model: model name sent to the selected provider (for example gpt-4o, gemini-2.0-flash).
 - API Key: provider credential used for requests. Keep this private.
@@ -106,14 +115,14 @@ Practical recommendation:
   - Lower values: more deterministic and precise.
   - Higher values: more creative but less consistent.
 
-### Browser settings (frontend)
+### 🌐 Browser settings (frontend)
 - Headless Mode: runs browser without visible UI window. Better for server execution.
 - Disable Security: relaxes some browser security restrictions for difficult cross-origin workflows. Use only when required.
 - Width: browser viewport width in pixels.
 - Height: browser viewport height in pixels.
 - CDP URL: connect to an existing Chromium instance via Chrome DevTools Protocol.
 
-### Agent settings (frontend)
+### 🤖 Agent settings (frontend)
 - Max Steps: maximum decision loops before the run stops.
 - Actions/Step: max number of tool/browser actions in a single step.
 - Max Input Tokens: context budget passed to the model.
@@ -124,7 +133,7 @@ Practical recommendation:
 - Use Vision: enables screenshot/image understanding.
 - Recording: saves session recordings under backend/tmp/recordings.
 
-### Backend environment settings
+### 🔒 Backend environment settings
 - OPENAI_API_KEY: key for OpenAI provider.
 - ANTHROPIC_API_KEY: key for Anthropic provider.
 - GOOGLE_API_KEY: key for Google provider.
