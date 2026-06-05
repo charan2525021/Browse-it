@@ -5,12 +5,17 @@ Browse-it is a web-based AI browser automation workspace with:
 - A FastAPI backend that runs an automation agent and streams live progress.
 - A React + Vite frontend where you configure models, browser behavior, and agent execution.
 
+<img width="1903" height="818" alt="image" src="https://github.com/user-attachments/assets/ac59d1ce-645c-4c48-a8b9-7aba52986118" />
+
 With this project, you can:
 - Give natural-language web tasks and let an agent execute them step by step.
 - Watch live browser screenshots and task progress in near real time.
 - Run data-extraction workflows (lists/tables/structured outputs).
 - Switch LLM providers based on quality, speed, privacy, and cost.
 - Tune browser and agent controls for reliability and repeatability.
+
+<img width="1908" height="855" alt="image" src="https://github.com/user-attachments/assets/4a395686-85f1-47e2-8489-43f8d45bc6e1" />
+
 
 ## How to install frontend and backend
 
