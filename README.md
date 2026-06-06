@@ -1,52 +1,134 @@
-# 🌈 Browse-it
+# Browse-it
 
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Automation](https://img.shields.io/badge/Automation-AI%20Browser%20Agent-FF6B35?style=for-the-badge&logo=googlechrome&logoColor=white)
-![LLM Ready](https://img.shields.io/badge/LLM-OpenAI%20%7C%20Azure%20%7C%20Google-7B61FF?style=for-the-badge&logo=openai&logoColor=white)
+![Automation](https://img.shields.io/badge/Automation-Agentic%20Web-FF6B35?style=for-the-badge&logo=googlechrome&logoColor=white)
+![LLM Ready](https://img.shields.io/badge/LLM-Multi%20Provider-7B61FF?style=for-the-badge&logo=openai&logoColor=white)
 
-## 🚀 What is Browse-it and what can we achieve with it?
-Browse-it is a web-based AI browser automation workspace with:
-- A FastAPI backend that runs an automation agent and streams live progress.
-- A React + Vite frontend where you configure models, browser behavior, and agent execution.
+## What is Browse-it?
+
+Browse-it is an Agentic Web workspace for running AI agents that can browse, inspect, extract, and interact with websites on a user's behalf.
+
+It combines:
+- A FastAPI backend that runs browser agents, streams live events over WebSocket, and exposes browser, config, history, and recording endpoints.
+- A React + Vite frontend that lets users launch tasks, watch browser progress live, switch agent modes, and tune LLM, browser, and execution settings.
+
+This project is built around the core Agentic Web idea: give the agent a goal in natural language, let it plan, act step by step, recover through multi-step flows, and show the user exactly what is happening.
 
 <img width="1903" height="818" alt="image" src="https://github.com/user-attachments/assets/ac59d1ce-645c-4c48-a8b9-7aba52986118" />
 
-With this project, you can:
-- Give natural-language web tasks and let an agent execute them step by step.
-- Watch live browser screenshots and task progress in near real time.
-- Run data-extraction workflows (lists/tables/structured outputs).
-- Switch LLM providers based on quality, speed, privacy, and cost.
-- Tune browser and agent controls for reliability and repeatability.
+## What Browse-it can do
+
+- Run natural-language browser tasks end to end through a Browser Agent.
+- Run a Deep Research mode for research-oriented tasks.
+- Generate a plan before execution and stream plan steps back to the UI.
+- Navigate websites, inspect live browser state, and stream screenshots in near real time.
+- Pause, resume, or stop long-running agent sessions.
+- Extract structured data for scraping, listing, comparison, and table-style outputs.
+- Summarize gathered web content into readable final answers.
+- Record browser sessions and list saved recordings from the backend.
+- Keep local task history with step-by-step execution traces.
+- Connect to multiple LLM providers and tune behavior for reliability, speed, privacy, or cost.
+- Connect to an existing Chromium session using CDP when needed.
+
+Typical use cases:
+- Web research and page summarization.
+- Data extraction from lists, directories, tables, and product pages.
+- Browser testing and validation flows.
+- Form-filling and multi-step web workflows.
+- Human-in-the-loop automation where the user monitors and intervenes only when needed.
 
 <img width="1908" height="855" alt="image" src="https://github.com/user-attachments/assets/4a395686-85f1-47e2-8489-43f8d45bc6e1" />
 
+## Product highlights
 
-## 🛠️ How to install frontend and backend
+### Agent modes
+- Browser Agent: general-purpose browser execution for navigation, interaction, extraction, and task completion.
+- Deep Research: a research-focused mode exposed in the UI for longer-form information gathering.
 
-### 🧩 Backend installation (Windows)
-1. Go to backend folder:
+### Live execution visibility
+- WebSocket-driven event streaming for status, plan updates, step logs, and browser screenshots.
+- Browser view with current URL and live screenshot updates.
+- Result panel, plan panel, and step timeline during execution.
+
+### Runtime controls
+- Start, pause, resume, and stop controls.
+- Progress tracking by current step vs. max steps.
+- Optional planning before acting.
+- Optional session recording to `backend/tmp/recordings`.
+
+### Configuration surface
+- LLM provider, model, API key, base URL, and temperature.
+- Browser headless mode, security relaxation, viewport size, and CDP connection.
+- Agent limits such as max steps, max actions per step, max input tokens, tool-calling method, and vision support.
+
+### Multi-provider LLM support
+The frontend already exposes these providers:
+- OpenAI
+- Anthropic
+- Google Gemini
+- Groq
+- DeepSeek
+- Ollama
+- Azure OpenAI
+- Mistral
+- Alibaba Qwen
+- Moonshot AI
+- SiliconFlow
+- ModelScope
+
+## Tech stack
+
+- Frontend: React, TypeScript, Vite, Tailwind CSS, Zustand, React Router
+- Backend: FastAPI, Pydantic, WebSocket streaming
+- Browser automation: Playwright and browser-use based agent orchestration
+- AI model layer: pluggable multi-provider LLM configuration
+
+## Project structure
+
+```text
+backend/
+  api/
+    routes/        # agent, browser, config, llm, recording endpoints
+    websocket/     # live agent event streaming
+  services/        # agent execution, planner, browser, llm services
+  models/          # request/response schemas
+  src/             # custom browser, controller, agent integrations
+
+frontend/
+  src/
+    pages/         # home, agent, settings, history
+    components/    # agent UI, browser view, settings panels, layout
+    hooks/         # agent actions, config state, websocket sync
+    store/         # UI, config, history, and runtime state
+    api/           # HTTP and websocket clients
+```
+
+## Installation
+
+### Backend setup on Windows
+1. Open a terminal in the repository root and go to the backend folder.
    ```powershell
    cd backend
    ```
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment.
    ```powershell
    python -m venv .venv
    .\.venv\Scripts\activate
    ```
-3. Install dependencies (recommended script for Python 3.14+):
+3. Install Python dependencies.
    ```powershell
    install.bat
    ```
-   or
+   Or:
    ```powershell
    pip install -r requirements.txt
    ```
-4. Install Playwright browser binaries:
+4. Install Playwright browser binaries.
    ```powershell
    playwright install chromium
    ```
-5. Create backend/.env file and add keys you need (examples):
+5. Create a `backend/.env` file and add the keys you want to use.
    ```env
    OPENAI_API_KEY=
    ANTHROPIC_API_KEY=
@@ -54,93 +136,126 @@ With this project, you can:
    AZURE_OPENAI_API_KEY=
    AZURE_OPENAI_ENDPOINT=
    DEEPSEEK_API_KEY=
+   OLLAMA_BASE_URL=http://localhost:11434
    CHROME_PERSISTENT_SESSION=false
    RESOLUTION=1920x1080x24
+   CORS_ORIGINS_STR=http://localhost:5173
    ```
 
-### 🎨 Frontend installation
-1. Open a second terminal and go to frontend folder:
+### Frontend setup
+1. Open another terminal and go to the frontend folder.
    ```powershell
    cd frontend
    ```
-2. Install dependencies:
+2. Install dependencies.
    ```powershell
    npm install
    ```
-3. Optional: if backend is not at localhost:8000, set API URL:
+3. If your backend runs somewhere else, set the frontend API URL before starting Vite.
    ```powershell
    $env:VITE_API_URL="http://localhost:8000"
    ```
 
-## ▶️ How to start frontend and backend
+## Run locally
 
-### 🔧 Start backend
-From backend folder with active venv:
+### Start the backend
+From the `backend` folder with the virtual environment active:
+
 ```powershell
 python run.py
 ```
-Backend runs on http://localhost:8000.
 
 Alternative:
+
 ```powershell
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### 💻 Start frontend
-From frontend folder:
+Backend default URL: `http://localhost:8000`
+
+### Start the frontend
+From the `frontend` folder:
+
 ```powershell
 npm run dev
 ```
-Frontend runs on http://localhost:5173.
 
-## ⚙️ Configuration settings (with recommendations)
+Frontend default URL: `http://localhost:5173`
 
-### 🧠 LLM provider recommendation
-If you want the most powerful and reliable model quality for complex browsing tasks:
-- OpenAI: best default quality/consistency for general use.
-- Azure OpenAI (Microsoft): best for enterprise governance, compliance, private networking, and production controls.
-- Google Gemini: strong speed/cost balance and very good multimodal performance.
+## How the app works
 
-Practical recommendation:
-- Highest overall reliability: OpenAI GPT-4o class models.
-- Enterprise production environments: Azure OpenAI GPT-4o deployments.
-- Cost/speed-sensitive workloads: Google Gemini 2.0 Flash class models.
+1. The user chooses an agent mode and enters a natural-language task.
+2. The frontend sends the task and runtime configuration to the FastAPI backend.
+3. The backend initializes the selected agent, configures the browser, and optionally generates a plan first.
+4. Execution events are streamed back through WebSocket.
+5. The UI updates live with status, plan steps, screenshots, browser state, intermediate steps, and final output.
+6. When enabled, recordings are saved and task history is preserved in the frontend state.
 
-### 🔑 LLM settings (frontend)
-- Provider: selects the LLM backend (OpenAI, Anthropic, Google, Groq, DeepSeek, Ollama, Azure OpenAI, and others).
-- Model: model name sent to the selected provider (for example gpt-4o, gemini-2.0-flash).
-- API Key: provider credential used for requests. Keep this private.
-- Base URL: custom endpoint (useful for proxy gateways, Azure-compatible endpoints, self-hosted APIs).
-- Temperature (0 to 2): response randomness.
-  - Lower values: more deterministic and precise.
-  - Higher values: more creative but less consistent.
+## Configuration guide
 
-### 🌐 Browser settings (frontend)
-- Headless Mode: runs browser without visible UI window. Better for server execution.
-- Disable Security: relaxes some browser security restrictions for difficult cross-origin workflows. Use only when required.
-- Width: browser viewport width in pixels.
-- Height: browser viewport height in pixels.
-- CDP URL: connect to an existing Chromium instance via Chrome DevTools Protocol.
+### LLM settings
+- Provider: selects the model backend.
+- Model: model or deployment name to use.
+- API Key: provider credential.
+- Base URL: optional custom or self-hosted endpoint.
+- Temperature: controls determinism vs. creativity.
 
-### 🤖 Agent settings (frontend)
-- Max Steps: maximum decision loops before the run stops.
-- Actions/Step: max number of tool/browser actions in a single step.
-- Max Input Tokens: context budget passed to the model.
-- Tool Method:
-  - auto: framework decides best call style.
-  - function_calling: explicit tool/function call style.
-  - raw: minimal transformation mode.
-- Use Vision: enables screenshot/image understanding.
-- Recording: saves session recordings under backend/tmp/recordings.
+Recommended defaults:
+- Best general reliability: OpenAI GPT-4o class models.
+- Enterprise deployment path: Azure OpenAI GPT-4o class deployments.
+- Good speed and cost balance: Gemini 2.0 Flash class models.
+- Local/offline experimentation: Ollama.
 
-### 🔒 Backend environment settings
-- OPENAI_API_KEY: key for OpenAI provider.
-- ANTHROPIC_API_KEY: key for Anthropic provider.
-- GOOGLE_API_KEY: key for Google provider.
-- AZURE_OPENAI_API_KEY: key for Azure OpenAI.
-- AZURE_OPENAI_ENDPOINT: Azure OpenAI endpoint URL.
-- DEEPSEEK_API_KEY: key for DeepSeek provider.
-- OLLAMA_BASE_URL: local Ollama API URL (default http://localhost:11434).
-- CHROME_PERSISTENT_SESSION: keep Chrome profile/session between runs (true/false).
-- RESOLUTION: default display color-depth format (example 1920x1080x24).
-- CORS_ORIGINS_STR: comma-separated frontend origins allowed by backend CORS.
+### Browser settings
+- Headless Mode: run without a visible window.
+- Disable Security: relax browser restrictions for difficult flows.
+- Width and Height: control viewport size.
+- CDP URL: attach to an existing Chromium instance.
+
+### Agent settings
+- Max Steps: total decision budget.
+- Actions per Step: browser/tool actions allowed in one cycle.
+- Max Input Tokens: model context budget.
+- Tool Method: `auto`, `function_calling`, or `raw`.
+- Use Vision: enable screenshot-aware reasoning.
+- Recording: save browser recordings.
+- Planning: generate an action plan before execution.
+
+### Backend environment variables
+- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `GOOGLE_API_KEY`
+- `AZURE_OPENAI_API_KEY`
+- `AZURE_OPENAI_ENDPOINT`
+- `DEEPSEEK_API_KEY`
+- `OLLAMA_BASE_URL`
+- `CHROME_PERSISTENT_SESSION`
+- `RESOLUTION`
+- `CORS_ORIGINS_STR`
+
+## API surface
+
+Main backend routes currently include:
+- `/api/agent/run`
+- `/api/agent/stop`
+- `/api/agent/pause`
+- `/api/agent/resume`
+- `/api/agent/status`
+- `/api/agent/history`
+- `/api/browser/screenshot`
+- `/api/browser/state`
+- `/api/config/all`
+- `/api/config/update`
+- `/api/recording/list`
+- `/ws/agent`
+
+## Why this fits the Agentic Web theme
+
+Browse-it is not just a chat UI with a browser attached. It already includes the core pieces expected in an Agentic Web product:
+- goal-driven browser execution
+- multi-step planning
+- live observation of the agent's actions
+- configurable recovery-oriented execution limits
+- research and extraction workflows
+- persistent session artifacts such as recordings and history
+- a UI that lets the user supervise instead of micromanage
