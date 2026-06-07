@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse-it Demo Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg-soft: #101a2d;
+      --panel: rgba(13, 23, 42, 0.72);
+      --panel-strong: rgba(17, 29, 52, 0.9);
+      --text: #f4f7fb;
+      --muted: rgba(244, 247, 251, 0.68);
+      --faint: rgba(244, 247, 251, 0.12);
+      --accent: #f5c451;
+      --accent-2: #77d7ff;
+      --accent-3: #8f7bff;
+      --good: #61e7b3;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(143, 123, 255, 0.22), transparent 32%),
+        radial-gradient(circle at top right, rgba(119, 215, 255, 0.18), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(97, 231, 179, 0.08), transparent 26%),
+        linear-gradient(160deg, #050b15 0%, #08111f 48%, #06101a 100%);
+      overflow: hidden;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    }
+
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 32px clamp(20px, 4vw, 60px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 20px;
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+      pointer-events: none;
+      transition: opacity 280ms ease, transform 280ms ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .topbar, .bottombar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 2;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(245, 196, 81, 1), rgba(119, 215, 255, 0.9));
+      box-shadow: 0 12px 30px rgba(245, 196, 81, 0.22);
+      display: grid;
+      place-items: center;
+      color: #07101c;
+      font-weight: 800;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-size: 13px;
+      backdrop-filter: blur(14px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 26px;
+      align-items: center;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      z-index: 1;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+    }
+
+    .hero-copy {
+      padding: clamp(26px, 4vw, 44px);
+      background:
+        radial-gradient(circle at top right, rgba(245, 196, 81, 0.16), transparent 24%),
+        linear-gradient(180deg, rgba(8, 17, 31, 0.76), rgba(13, 23, 42, 0.82));
+    }
+
+    h1, h2, h3 { margin: 0; }
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      max-width: 11ch;
+    }
+
+    .subtitle {
+      margin-top: 18px;
+      font-size: clamp(18px, 2vw, 26px);
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    .accent {
+      color: var(--accent);
+      text-shadow: 0 0 24px rgba(245, 196, 81, 0.18);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mockup {
+      padding: 20px;
+      min-height: 560px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mockup::before {
+      content: "";
+      position: absolute;
+      inset: -35% -20% auto auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(119,215,255,0.28), transparent 68%);
+      filter: blur(8px);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.68);
+      font-size: 13px;
+    }
+
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #febc2e; }
+    .dot.green { background: #28c840; }
+
+    .browser-card {
+      position: relative;
+      z-index: 1;
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(7, 14, 24, 0.85), rgba(11, 19, 34, 0.96));
+      border: 1px solid rgba(255,255,255,0.08);
+      min-height: 420px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .browser-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .urlbar {
+      flex: 1;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.72);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .browser-body {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .ui-card {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar {
+      height: 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 67%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .bar.small > i { width: 42%; }
+    .bar.mid > i { width: 78%; }
+    .bar.long > i { width: 93%; }
+
+    .step-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .step .badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: rgba(245,196,81,0.14);
+      color: var(--accent);
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .step p { margin: 0; color: var(--muted); font-size: 14px; }
+    .step strong { display: block; margin-bottom: 4px; }
+
+    .section-grid {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .feature-card, .timeline-card, .use-card, .install-card {
+      padding: 22px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-2);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(34px, 4.4vw, 56px);
+      line-height: 1;
+      margin-bottom: 14px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-text {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 17px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .feature-card ul, .use-card ul, .install-card ol {
+      margin: 14px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .architecture {
+      display: grid;
+      gap: 14px;
+    }
+
+    .arch-row {
+      display: grid;
+      grid-template-columns: 0.8fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .arch-item {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .arch-item strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .arch-item p, .tiny {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .workflow-step {
+      padding: 18px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      min-height: 170px;
+      position: relative;
+    }
+
+    .workflow-step .num {
+      font-size: 13px;
+      color: var(--accent-2);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .workflow-step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .workflow-step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .footer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button.nav {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      cursor: pointer;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    button.nav:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+    button.nav.primary {
+      background: linear-gradient(135deg, var(--accent), #f7da8e);
+      color: #08111f;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .dots-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dots-nav button {
+      width: 11px;
+      height: 11px;
+      padding: 0;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.22);
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, width 160ms ease, border-radius 160ms ease;
+    }
+
+    .dots-nav button.active {
+      width: 34px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .counter {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .slide-layout {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+    }
+
+    .center {
+      align-self: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .check {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .check b {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      color: #06101a;
+      background: linear-gradient(135deg, var(--good), #b1f4d9);
+      flex: 0 0 auto;
+      font-size: 13px;
+      margin-top: 1px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .timeline-item span {
+      color: var(--accent-2);
+      font-weight: 700;
+      min-width: 30px;
+    }
+
+    .timeline-item p { margin: 0; color: var(--muted); line-height: 1.6; }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .shot {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .shot img {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+      object-fit: cover;
+    }
+
+    .shot p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .slide { position: relative; min-height: 100vh; height: auto; opacity: 1; transform: none; pointer-events: auto; }
+      .deck { height: auto; }
+      .hero, .split, .section-grid, .workflow, .grid-2, .arch-row, .screenshot-grid { grid-template-columns: 1fr; }
+      .workflow { grid-template-columns: 1fr 1fr; }
+      .browser-body { grid-template-columns: 1fr; }
+      .hero-stats { grid-template-columns: 1fr; }
+      .footer-nav { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 720px) {
+      .slide { padding: 18px; }
+      h1 { font-size: clamp(42px, 15vw, 64px); }
+      .subtitle { font-size: 17px; }
+      .workflow { grid-template-columns: 1fr; }
+      .nav-buttons { width: 100%; }
+      button.nav { flex: 1; }
+      .counter { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="deck" id="deck">
+    <section class="slide active" data-slide>
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">B</div>
+          <div>
+            <div>Browse-it</div>
+            <div class="note">Agentic Web demo presentation</div>
+          </div>
+        </div>
+        <div class="chip">Standalone HTML deck outside the app source</div>
+      </div>
+
+      <div class="hero">
+        <div class="panel hero-copy">
+          <div class="eyebrow">Agentic Web</div>
+          <h1>AI that can <span class="accent">browse</span>, act, and finish the job</h1>
+          <p class="subtitle">
+            Browse-it is a browser automation workspace that turns natural-language goals into live, multi-step web execution with planning, screenshots, history, recordings, and control.
+          </p>
+          <div class="hero-stats">
+            <div class="stat"><strong>2</strong><span>main agent modes: Browser and Deep Research</span></div>
+            <div class="stat"><strong>Live</strong><span>screenshots, status, and step streaming over WebSocket</span></div>
+            <div class="stat"><strong>Multi</strong><span>LLM providers, local config, and browser controls</span></div>
+          </div>
+        </div>
+
+        <div class="panel mockup">
+          <div class="window-bar">
+            <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <span>Browser Agent Console</span>
+          </div>
+          <div class="browser-card">
+            <div class="browser-toolbar">
+              <div class="pill">Status: running</div>
+              <div class="urlbar">https://example.com/research / extract / act</div>
+            </div>
+            <div class="browser-body">
+              <div class="ui-card">
+                <div class="pill">Plan</div>
+                <div class="bar long"><i></i></div>
+                <div class="bar mid"><i></i></div>
+                <div class="bar small"><i></i></div>
+                <div class="step-list">
+                  <div class="step"><div class="badge">1</div><div><strong>Inspect</strong><p>Open the page and understand the task.</p></div></div>
+                  <div class="step"><div class="badge">2</div><div><strong>Interact</strong><p>Click, fill, navigate, or recover as needed.</p></div></div>
+                  <div class="step"><div class="badge">3</div><div><strong>Deliver</strong><p>Return structured output and a final answer.</p></div></div>
+                </div>
+              </div>
+              <div class="ui-card">
+                <div class="pill">Live browser view</div>
+                <div class="bar"><i></i></div>
+                <div class="bar mid"><i></i></div>
+                <div class="bar long"><i></i></div>
+                <div class="bar small"><i></i></div>
+                <div class="bar mid"><i></i></div>
+                <div class="bar"><i></i></div>
+              </div>
+            </div>
+            <div class="browser-toolbar" style="justify-content: space-between;">
+              <span>Pause • Resume • Stop</span>
+              <span>Recording enabled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottombar">
+        <div class="note">Use arrow keys or the buttons below to move through slides.</div>
+        <div class="counter" id="counter">Slide 1 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">What it can do</div>
+      </div>
+      <div class="split center">
+        <div class="panel feature-card">
+          <div class="eyebrow">Capabilities</div>
+          <div class="section-title">Useful enough for real workflows</div>
+          <p class="section-text">
+            The product is designed to let a user describe a task once, then supervise the agent while it handles the browsing, retries, extraction, and reporting.
+          </p>
+          <ul>
+            <li>Natural-language browser automation</li>
+            <li>Deep Research mode for longer-form discovery</li>
+            <li>Structured extraction for lists and tables</li>
+            <li>Live screenshots and execution state</li>
+            <li>Pause, resume, and stop controls</li>
+          </ul>
+        </div>
+        <div class="panel feature-card">
+          <div class="eyebrow">Typical jobs</div>
+          <div class="section-title">From research to repetitive tasks</div>
+          <div class="checklist">
+            <div class="check"><b>✓</b><div><strong>Web research</strong><div class="tiny">Collect facts, summarize pages, and compare sources.</div></div></div>
+            <div class="check"><b>✓</b><div><strong>Data extraction</strong><div class="tiny">Pull names, prices, links, and structured tables.</div></div></div>
+            <div class="check"><b>✓</b><div><strong>Browser testing</strong><div class="tiny">Exercise forms, flows, and page interactions.</div></div></div>
+            <div class="check"><b>✓</b><div><strong>Human-in-the-loop automation</strong><div class="tiny">Let the user monitor instead of micromanage.</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div></div>
+        <div class="counter">Slide 2 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">Architecture overview</div>
+      </div>
+      <div class="split center">
+        <div class="panel feature-card">
+          <div class="eyebrow">Frontend</div>
+          <div class="section-title">A control room for the agent</div>
+          <p class="section-text">
+            The React + Vite UI provides task entry, settings, history, and a live browser workspace with step updates and final outputs.
+          </p>
+          <div class="stack" style="margin-top: 18px;">
+            <div class="pill">Home page for quick launch</div>
+            <div class="pill">Agent page with browser, plan, and results</div>
+            <div class="pill">Settings page for LLM and browser tuning</div>
+            <div class="pill">History page for previous runs</div>
+          </div>
+        </div>
+        <div class="panel feature-card">
+          <div class="eyebrow">Backend</div>
+          <div class="section-title">FastAPI orchestration layer</div>
+          <p class="section-text">
+            The backend runs the agent, streams events through WebSocket, and exposes routes for agent control, browser state, config, and recordings.
+          </p>
+          <div class="architecture">
+            <div class="arch-row">
+              <div class="arch-item"><strong>Agent</strong><p>Run, pause, resume, stop, and track progress.</p></div>
+              <div class="arch-item"><strong>Browser</strong><p>Expose screenshots and current page state.</p></div>
+              <div class="arch-item"><strong>Config</strong><p>Read and update model and browser settings.</p></div>
+            </div>
+            <div class="arch-row">
+              <div class="arch-item"><strong>Recording</strong><p>List saved session recordings from disk.</p></div>
+              <div class="arch-item"><strong>WebSocket</strong><p>Push live plan, step, status, and browser events.</p></div>
+              <div class="arch-item"><strong>Models</strong><p>Typed request and response schemas.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div></div>
+        <div class="counter">Slide 3 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">README screenshots</div>
+      </div>
+      <div class="center" style="max-width: 1380px; width: 100%; margin: 0 auto;">
+        <div class="section-title" style="margin-bottom: 14px;">Screenshots from the README</div>
+        <p class="section-text" style="max-width: 72ch; margin-bottom: 24px;">
+          These are the same project screenshots shown in the README so the demo deck stays aligned with the documentation.
+        </p>
+        <div class="screenshot-grid">
+          <div class="panel shot">
+            <img src="assets/readme-screenshot-1.svg" alt="Browse-it screenshot showing the main agent interface" />
+            <p>Main agent interface screenshot recreated from the README layout.</p>
+          </div>
+          <div class="panel shot">
+            <img src="assets/readme-screenshot-2.svg" alt="Browse-it screenshot showing a second interface view" />
+            <p>Secondary product screenshot recreated from the README layout.</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div class="note">Added directly from the README so the deck feels consistent with the repo.</div>
+        <div class="counter">Slide 4 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">How it runs</div>
+      </div>
+      <div class="center" style="max-width: 1380px; width: 100%; margin: 0 auto;">
+        <div class="section-title" style="margin-bottom: 14px;">A simple execution loop</div>
+        <p class="section-text" style="max-width: 72ch; margin-bottom: 24px;">
+          The user provides a goal, the backend prepares the agent and browser, and the UI stays in sync as the agent plans, acts, recovers, and returns a result.
+        </p>
+        <div class="workflow">
+          <div class="workflow-step">
+            <div class="num">Step 01</div>
+            <strong>User task</strong>
+            <p>Enter a natural-language instruction in the browser console.</p>
+          </div>
+          <div class="workflow-step">
+            <div class="num">Step 02</div>
+            <strong>Configuration</strong>
+            <p>Choose a model, browser mode, vision, planning, and limits.</p>
+          </div>
+          <div class="workflow-step">
+            <div class="num">Step 03</div>
+            <strong>Planning</strong>
+            <p>The agent can generate a plan before taking action.</p>
+          </div>
+          <div class="workflow-step">
+            <div class="num">Step 04</div>
+            <strong>Execution</strong>
+            <p>It navigates, clicks, fills, extracts, and responds to errors.</p>
+          </div>
+          <div class="workflow-step">
+            <div class="num">Step 05</div>
+            <strong>Visibility</strong>
+            <p>Live screenshots, step logs, browser state, and status are streamed.</p>
+          </div>
+          <div class="workflow-step">
+            <div class="num">Step 06</div>
+            <strong>Delivery</strong>
+            <p>Final results, history, and recordings remain available for review.</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div class="note">This is the core Agentic Web loop: goal, plan, act, recover, deliver.</div>
+        <div class="counter">Slide 5 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">Setup and demo</div>
+      </div>
+      <div class="split center">
+        <div class="panel install-card">
+          <div class="eyebrow">Install</div>
+          <div class="section-title">Quick local setup</div>
+          <ol>
+            <li>Install backend dependencies in a Python virtual environment.</li>
+            <li>Install Playwright Chromium binaries.</li>
+            <li>Create backend environment variables for model access.</li>
+            <li>Install frontend dependencies with npm.</li>
+            <li>Start backend on port 8000 and frontend on port 5173.</li>
+          </ol>
+          <div class="pill" style="margin-top: 18px;">Backend: <span class="accent">python run.py</span></div>
+          <div class="pill" style="margin-top: 10px;">Frontend: <span class="accent">npm run dev</span></div>
+        </div>
+        <div class="panel install-card">
+          <div class="eyebrow">Use it</div>
+          <div class="section-title">A demo script you can present</div>
+          <div class="timeline">
+            <div class="timeline-item"><span>1</span><p>Launch the app and open the Agent page.</p></div>
+            <div class="timeline-item"><span>2</span><p>Pick Browser Agent or Deep Research.</p></div>
+            <div class="timeline-item"><span>3</span><p>Enter a task like searching, extracting, or filling a form.</p></div>
+            <div class="timeline-item"><span>4</span><p>Point out the live browser view, plan panel, and progress bar.</p></div>
+            <div class="timeline-item"><span>5</span><p>Show pause/resume and the history page after execution.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div class="note">This deck is standalone HTML and intentionally separate from the app code.</div>
+        <div class="counter">Slide 6 of 7</div>
+      </div>
+    </section>
+
+    <section class="slide" data-slide>
+      <div class="topbar">
+        <div class="brand"><div class="brand-mark">B</div><div>Browse-it</div></div>
+        <div class="chip">Closing slide</div>
+      </div>
+      <div class="hero" style="grid-template-columns: 1fr; max-width: 1120px;">
+        <div class="panel hero-copy" style="text-align: left;">
+          <div class="eyebrow">Summary</div>
+          <h1>Build once, <span class="accent">supervise</span> less</h1>
+          <p class="subtitle">
+            Browse-it shows the Agentic Web idea in practice: let AI browse, interact, recover, and complete tasks while keeping the user informed and in control.
+          </p>
+          <div class="hero-stats" style="grid-template-columns: repeat(2, 1fr); max-width: 760px;">
+            <div class="stat"><strong>Live</strong><span>progress, state, screenshots, and results</span></div>
+            <div class="stat"><strong>Flexible</strong><span>multi-provider model support and browser controls</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottombar">
+        <div class="note">Tip: open demo-presentation/index.html directly in a browser for presentation mode.</div>
+        <div class="counter">Slide 7 of 7</div>
+      </div>
+    </section>
+
+    <div style="position: fixed; left: 0; right: 0; bottom: 20px; z-index: 10; padding: 0 18px;">
+      <div class="footer-nav panel" style="padding: 14px 16px; max-width: 1380px; margin: 0 auto;">
+        <div class="nav-buttons">
+          <button class="nav" id="prevBtn">Previous</button>
+          <button class="nav primary" id="nextBtn">Next</button>
+        </div>
+        <div class="dots-nav" id="dotsNav" aria-label="Slide navigation"></div>
+        <div class="counter" id="liveCounter">Slide 1 of 7</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('[data-slide]'));
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dotsNav = document.getElementById('dotsNav');
+    const liveCounter = document.getElementById('liveCounter');
+    const counter = document.getElementById('counter');
+    let current = 0;
+
+    function renderDots() {
+      dotsNav.innerHTML = '';
+      slides.forEach((_, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = index === current ? 'active' : '';
+        button.title = `Go to slide ${index + 1}`;
+        button.addEventListener('click', () => goTo(index));
+        dotsNav.appendChild(button);
+      });
+    }
+
+    function updateUI() {
+      slides.forEach((slide, index) => slide.classList.toggle('active', index === current));
+      const label = `Slide ${current + 1} of ${slides.length}`;
+      if (liveCounter) liveCounter.textContent = label;
+      if (counter) counter.textContent = label;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+      prevBtn.style.opacity = current === 0 ? 0.45 : 1;
+      nextBtn.style.opacity = current === slides.length - 1 ? 0.45 : 1;
+      renderDots();
+    }
+
+    function goTo(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      updateUI();
+    }
+
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') {
+        event.preventDefault();
+        goTo(current + 1);
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+        event.preventDefault();
+        goTo(current - 1);
+      }
+      if (event.key === 'Home') goTo(0);
+      if (event.key === 'End') goTo(slides.length - 1);
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>

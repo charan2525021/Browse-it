@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAgent } from '@/hooks/useAgent'
 import { useAgentStore } from '@/store/agentStore'
 import BrowserView from '@/components/browser/BrowserView'
+import MultiBrowserView from '@/components/browser/MultiBrowserView'
 import AgentStepList from '@/components/agent/AgentStepList'
 import AgentResultView from '@/components/agent/AgentResultView'
 import PlanView from '@/components/agent/PlanView'
@@ -27,10 +28,11 @@ export default function AgentPage() {
   const [task, setTask] = useState('')
   const [agentType, setAgentType] = useState<AgentType>('browser_use')
   const { run, stop, pause, resume, loading } = useAgent()
-  const { isRunning, isPaused, steps, currentStep, maxSteps, status, screenshot } = useAgentStore()
+  const { isRunning, isPaused, steps, currentStep, maxSteps, status, screenshot, reset } = useAgentStore()
 
   const handleSubmit = () => { if (task.trim() && !isRunning) run(task, agentType) }
   const handleFormSubmit = (e: React.FormEvent) => { e.preventDefault(); handleSubmit() }
+  const handleNewChat = () => { reset(); setTask('') }
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -96,13 +98,19 @@ export default function AgentPage() {
               {isRunning && !isPaused && <button onClick={pause} className="px-3 py-1.5 rounded-lg bg-gold/10 border border-gold/30 text-sm font-medium text-bark dark:text-gold hover:bg-gold/20 transition-colors">⏸ Pause</button>}
               {isRunning && isPaused && <button onClick={resume} className="px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-sm font-medium text-green-700 dark:text-green-400">▶ Resume</button>}
               {isRunning && <button onClick={stop} className="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm font-medium text-red-700 dark:text-red-400">⏹ Stop</button>}
+              {!isRunning && (status === 'completed' || status === 'error' || steps.length > 0) && (
+                <button onClick={handleNewChat} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold text-bark text-sm font-semibold hover:bg-gold-light transition-colors shadow-sm shadow-gold/25">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5"><path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z"/></svg>
+                  New Chat
+                </button>
+              )}
             </div>
           </div>
 
           {isRunning && <div className="h-1 bg-cream-200 dark:bg-night-lighter rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-gold to-gold-dark" style={{ width: `${Math.min((currentStep / maxSteps) * 100, 100)}%` }} /></div>}
 
           <div className="flex-1 grid grid-cols-1 xl:grid-cols-5 gap-4 min-h-0 overflow-hidden">
-            <div className="xl:col-span-3 min-h-0 overflow-hidden"><BrowserView /></div>
+            <div className="xl:col-span-3 min-h-0 overflow-hidden">{agentType === 'deep_research' ? <MultiBrowserView /> : <BrowserView />}</div>
             <div className="xl:col-span-2 flex flex-col gap-4 min-h-0 overflow-hidden">
               <AgentResultView />
               <PlanView />

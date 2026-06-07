@@ -1,6 +1,7 @@
 export type AgentEvent =
   | { type: 'agent_step'; step: number; action: string; result: string; timestamp: string }
   | { type: 'browser_state'; screenshot: string; url: string }
+  | { type: 'browser_states'; browsers: { id: string; screenshot: string; url: string; query: string }[] }
   | { type: 'agent_output'; result: string }
   | { type: 'error'; message: string }
   | { type: 'status'; status: string }

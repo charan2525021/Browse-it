@@ -14,7 +14,7 @@ export function useAgent() {
       setLoading(true)
       reset()
       setTask(task, agentType)
-      setStatus({ is_running: true, status: 'running' })
+      setStatus({ is_running: true, status: 'running', max_steps: agent.max_steps, current_step: 0 })
       await agentApi.run({ task, agent_type: agentType, llm, browser, agent })
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)

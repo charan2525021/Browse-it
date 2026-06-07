@@ -58,7 +58,7 @@ export default function BrowserView() {
       {/* Page Content */}
       <div ref={contentRef} className="flex-1 min-h-0 relative bg-white dark:bg-[#1c1c1c] overflow-hidden">
         {screenshot ? (
-          <img src={`data:image/png;base64,${screenshot}`} alt="Browser" className="w-full h-full object-contain object-top bg-white" />
+          <img src={`data:image/jpeg;base64,${screenshot}`} alt="Browser" className="w-full h-full object-contain object-top bg-white" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4 min-h-[300px]">
             {isRunning ? (

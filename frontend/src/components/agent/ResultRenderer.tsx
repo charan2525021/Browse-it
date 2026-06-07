@@ -38,6 +38,47 @@ function parseMarkdownTable(text: string): { headers: string[]; rows: string[][]
   return { headers, rows }
 }
 
+/* Recursively render a cell value - nested objects/arrays become readable, not raw JSON */
+function CellValue({ val }: { val: unknown }) {
+  if (val === null || val === undefined || val === '') return <span className="text-bark/30 dark:text-gray-600">—</span>
+
+  // Array
+  if (Array.isArray(val)) {
+    // Array of primitives → comma chips
+    if (val.every(v => typeof v !== 'object' || v === null)) {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {val.map((v, i) => (
+            <span key={i} className="px-1.5 py-0.5 rounded bg-cream-200/70 dark:bg-night-lighter text-xs">{String(v)}</span>
+          ))}
+        </div>
+      )
+    }
+    // Array of objects → stacked
+    return (
+      <div className="flex flex-col gap-2">
+        {val.map((v, i) => <div key={i} className="pl-2 border-l-2 border-gold/30"><CellValue val={v} /></div>)}
+      </div>
+    )
+  }
+
+  // Object → key: value rows
+  if (typeof val === 'object') {
+    return (
+      <div className="flex flex-col gap-1">
+        {Object.entries(val as Record<string, unknown>).map(([k, v]) => (
+          <div key={k} className="flex gap-2 text-xs">
+            <span className="font-semibold text-bark dark:text-gray-200 capitalize whitespace-nowrap">{k.replace(/_/g, ' ')}:</span>
+            <span className="text-bark/70 dark:text-gray-400 min-w-0"><CellValue val={v} /></span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return <span>{String(val)}</span>
+}
+
 /* Render a table from array of objects */
 function DataTable({ data }: { data: Record<string, unknown>[] }) {
   const keys = Array.from(new Set(data.flatMap(obj => Object.keys(obj))))
@@ -55,10 +96,10 @@ function DataTable({ data }: { data: Record<string, unknown>[] }) {
         </thead>
         <tbody>
           {data.map((row, i) => (
-            <tr key={i} className="even:bg-cream-100/50 dark:even:bg-night/50 hover:bg-gold/5 transition-colors">
+            <tr key={i} className="even:bg-cream-100/50 dark:even:bg-night/50 hover:bg-gold/5 transition-colors align-top">
               {keys.map(k => (
-                <td key={k} className="px-3 py-2 text-bark/80 dark:text-gray-300 border-b border-cream-200 dark:border-night-lighter align-top">
-                  {formatCell(row[k])}
+                <td key={k} className="px-3 py-2 text-bark/80 dark:text-gray-300 border-b border-cream-200 dark:border-night-lighter align-top min-w-[120px]">
+                  <CellValue val={row[k]} />
                 </td>
               ))}
             </tr>
@@ -67,12 +108,6 @@ function DataTable({ data }: { data: Record<string, unknown>[] }) {
       </table>
     </div>
   )
-}
-
-function formatCell(val: unknown): string {
-  if (val === null || val === undefined) return '—'
-  if (typeof val === 'object') return JSON.stringify(val)
-  return String(val)
 }
 
 /* Render markdown table */
@@ -104,11 +139,11 @@ function MarkdownTable({ headers, rows }: { headers: string[]; rows: string[][] 
 /* Render a key-value object as a definition list */
 function ObjectView({ obj }: { obj: Record<string, unknown> }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {Object.entries(obj).map(([k, v]) => (
         <div key={k} className="flex gap-3 text-sm">
-          <span className="font-semibold text-bark dark:text-white capitalize min-w-[120px]">{k.replace(/_/g, ' ')}:</span>
-          <span className="text-bark/70 dark:text-gray-300">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+          <span className="font-semibold text-bark dark:text-white capitalize min-w-[140px] shrink-0">{k.replace(/_/g, ' ')}:</span>
+          <span className="text-bark/70 dark:text-gray-300 min-w-0"><CellValue val={v} /></span>
         </div>
       ))}
     </div>

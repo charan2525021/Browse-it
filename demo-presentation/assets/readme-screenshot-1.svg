@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Browse-it demo screenshot 1">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1220"/>
+      <stop offset="100%" stop-color="#111d35"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f5c451"/>
+      <stop offset="100%" stop-color="#77d7ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" rx="32" fill="url(#bg)"/>
+  <rect x="18" y="18" width="1564" height="864" rx="26" fill="#0d172a" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="40" y="40" width="1520" height="64" rx="18" fill="#121f38" stroke="rgba(255,255,255,0.08)"/>
+  <circle cx="78" cy="72" r="10" fill="#ff5f57"/>
+  <circle cx="110" cy="72" r="10" fill="#febc2e"/>
+  <circle cx="142" cy="72" r="10" fill="#28c840"/>
+  <text x="190" y="80" fill="#f4f7fb" font-family="Space Grotesk, Arial, sans-serif" font-size="26" font-weight="700">Browse-it Agent Console</text>
+  <rect x="40" y="132" width="1520" height="702" rx="24" fill="#09111f" stroke="rgba(255,255,255,0.07)"/>
+  <rect x="68" y="162" width="460" height="640" rx="22" fill="#101b31" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="68" y="162" width="460" height="58" rx="22" fill="#16243c"/>
+  <text x="96" y="198" fill="#77d7ff" font-family="Space Grotesk, Arial, sans-serif" font-size="22" font-weight="700">Plan</text>
+  <rect x="96" y="246" width="404" height="18" rx="9" fill="#233450"/>
+  <rect x="96" y="286" width="348" height="18" rx="9" fill="url(#accent)"/>
+  <rect x="96" y="326" width="280" height="18" rx="9" fill="#233450"/>
+  <rect x="96" y="390" width="404" height="88" rx="18" fill="#182740"/>
+  <circle cx="130" cy="434" r="16" fill="#f5c451"/>
+  <text x="168" y="426" fill="#f4f7fb" font-family="Space Grotesk, Arial, sans-serif" font-size="24" font-weight="700">Inspect</text>
+  <text x="168" y="456" fill="rgba(244,247,251,0.68)" font-family="Space Grotesk, Arial, sans-serif" font-size="18">Open the page and understand the task.</text>
+  <rect x="96" y="500" width="404" height="88" rx="18" fill="#182740"/>
+  <circle cx="130" cy="544" r="16" fill="#61e7b3"/>
+  <text x="168" y="536" fill="#f4f7fb" font-family="Space Grotesk, Arial, sans-serif" font-size="24" font-weight="700">Interact</text>
+  <text x="168" y="566" fill="rgba(244,247,251,0.68)" font-family="Space Grotesk, Arial, sans-serif" font-size="18">Click, fill, navigate, or recover as needed.</text>
+  <rect x="96" y="610" width="404" height="88" rx="18" fill="#182740"/>
+  <circle cx="130" cy="654" r="16" fill="#77d7ff"/>
+  <text x="168" y="646" fill="#f4f7fb" font-family="Space Grotesk, Arial, sans-serif" font-size="24" font-weight="700">Deliver</text>
+  <text x="168" y="676" fill="rgba(244,247,251,0.68)" font-family="Space Grotesk, Arial, sans-serif" font-size="18">Return structured output and a final answer.</text>
+  <rect x="556" y="162" width="956" height="640" rx="22" fill="#0b1526" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="584" y="190" width="900" height="68" rx="999" fill="#121f38"/>
+  <text x="620" y="232" fill="rgba(244,247,251,0.72)" font-family="Space Grotesk, Arial, sans-serif" font-size="20">https://example.com / research / extract / act</text>
+  <rect x="584" y="286" width="900" height="246" rx="24" fill="#101b31"/>
+  <rect x="620" y="326" width="400" height="18" rx="9" fill="#233450"/>
+  <rect x="620" y="366" width="612" height="18" rx="9" fill="#233450"/>
+  <rect x="620" y="406" width="520" height="18" rx="9" fill="#233450"/>
+  <rect x="620" y="446" width="468" height="18" rx="9" fill="#233450"/>
+  <rect x="620" y="518" width="780" height="18" rx="9" fill="url(#accent)"/>
+  <rect x="584" y="554" width="900" height="186" rx="24" fill="#101b31"/>
+  <text x="620" y="608" fill="#f4f7fb" font-family="Space Grotesk, Arial, sans-serif" font-size="26" font-weight="700">Live browser state</text>
+  <text x="620" y="648" fill="rgba(244,247,251,0.68)" font-family="Space Grotesk, Arial, sans-serif" font-size="18">Screenshots, status, and step streaming over WebSocket.</text>
+  <rect x="584" y="774" width="900" height="28" rx="14" fill="#182740"/>
+</svg>

@@ -70,10 +70,19 @@ class AgentService:
 
     async def stop(self):
         self._status = "stopping"
-        if self._agent and hasattr(self._agent, "stop"):
-            self._agent.stop()
+        self._is_running = False  # Signal all loops (heartbeat, screenshot) to exit
+        agent = self._agent
+        if agent is not None and hasattr(agent, "stop"):
+            try:
+                res = agent.stop()
+                if asyncio.iscoroutine(res):
+                    await res
+            except Exception as e:
+                logger.warning(f"Error stopping agent: {e}")
         if self._task:
             self._task.cancel()
+        self._status = "stopped"
+        await self._event_queue.put({"type": "status", "status": "stopped"})
         await self._cleanup()
 
     async def pause(self):
@@ -301,25 +310,32 @@ class AgentService:
                     })
 
             # Background screenshot capture every 500ms for smooth browser view
+            # High-frequency screenshot capture for a live, real-browser feel.
+            # Uses JPEG (smaller/faster than PNG) and skips identical frames.
             async def _screenshot_loop():
+                last_hash = None
                 while self._is_running:
                     try:
-                        await asyncio.sleep(0.5)
-                        if not self._is_running or not self._browser_context:
-                            break
+                        if not self._browser_context:
+                            await asyncio.sleep(0.1)
+                            continue
                         page = await self._browser_context.get_current_page()
-                        screenshot_bytes = await page.screenshot()
-                        screenshot_b64 = base64.b64encode(screenshot_bytes).decode()
-                        url = page.url
-                        await self._emit({
-                            "type": "browser_state",
-                            "screenshot": screenshot_b64,
-                            "url": url,
-                        })
+                        screenshot_bytes = await page.screenshot(type="jpeg", quality=60)
+                        # Skip emitting if the frame hasn't changed (saves bandwidth)
+                        h = hash(screenshot_bytes)
+                        if h != last_hash:
+                            last_hash = h
+                            await self._emit({
+                                "type": "browser_state",
+                                "screenshot": base64.b64encode(screenshot_bytes).decode(),
+                                "url": page.url,
+                                "format": "jpeg",
+                            })
+                        await asyncio.sleep(0.12)  # ~8 fps
                     except asyncio.CancelledError:
                         break
                     except Exception:
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(0.5)
 
             screenshot_task = asyncio.create_task(_screenshot_loop())
 
@@ -390,7 +406,9 @@ class AgentService:
             })
 
             browser_config = {
-                "headless": True,  # Research runs many browsers - keep headless
+                # Respect the user's headless setting. Headless triggers Google CAPTCHAs
+                # far more often, so non-headless is recommended for research.
+                "headless": request.browser.headless,
                 "window_width": request.browser.window_width or 1280,
                 "window_height": request.browser.window_height or 1100,
                 "disable_security": request.browser.disable_security,
@@ -403,22 +421,50 @@ class AgentService:
             )
             self._agent = agent
 
-            # Stream a progress heartbeat while research runs
+            # Deep research progresses through its own internal research plan, not fixed steps.
+            # Show an indeterminate progress heartbeat capped at max_steps for display.
+            self._max_steps = max(request.agent.max_steps, 1)
             self._current_step = 1
             heartbeat_step = {"n": 1}
 
+            # Import the registry of active browser sub-agents so we can stream their screenshots
+            from src.agent.deep_research.deep_research_agent import _BROWSER_AGENT_INSTANCES
+
             async def _heartbeat():
                 while self._is_running:
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(1.5)
                     if not self._is_running:
                         break
-                    heartbeat_step["n"] += 1
+                    if heartbeat_step["n"] < self._max_steps:
+                        heartbeat_step["n"] += 1
                     self._current_step = heartbeat_step["n"]
+
+                    # Capture screenshots from all active parallel browser sub-tasks
+                    browsers = []
+                    for key, inst in list(_BROWSER_AGENT_INSTANCES.items()):
+                        try:
+                            ctx = getattr(inst, "browser_context", None)
+                            if ctx is None:
+                                continue
+                            page = await ctx.get_current_page()
+                            shot = await page.screenshot(type="jpeg", quality=60)
+                            browsers.append({
+                                "id": key,
+                                "screenshot": base64.b64encode(shot).decode(),
+                                "url": page.url,
+                                "query": getattr(inst, "task", "")[:80],
+                            })
+                        except Exception:
+                            continue
+
+                    if browsers:
+                        await self._emit({"type": "browser_states", "browsers": browsers})
+
                     await self._emit({
                         "type": "agent_step",
                         "step": heartbeat_step["n"],
-                        "action": "🔍 Researching across sources",
-                        "result": "Gathering and analyzing information...",
+                        "action": f"🔍 Researching ({len(browsers)} active browser{'s' if len(browsers) != 1 else ''})",
+                        "result": "Gathering and analyzing information across sources...",
                         "timestamp": datetime.now().isoformat(),
                     })
 
@@ -431,6 +477,10 @@ class AgentService:
             )
 
             hb_task.cancel()
+            try:
+                await hb_task
+            except (asyncio.CancelledError, Exception):
+                pass
 
             # Extract the report from the result
             report = ""

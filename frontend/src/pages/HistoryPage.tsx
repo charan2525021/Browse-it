@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useHistoryStore } from '@/store/historyStore'
+import ResultRenderer from '@/components/agent/ResultRenderer'
 
 export default function HistoryPage() {
   const { entries, removeEntry, clearAll } = useHistoryStore()
@@ -58,8 +59,10 @@ export default function HistoryPage() {
                   <div className="border-t border-cream-300 dark:border-night-lighter p-4 flex flex-col gap-3">
                     {entry.result && (
                       <div className="bg-green-500/5 rounded-xl p-3 border border-green-500/20">
-                        <div className="flex items-center gap-2 mb-1"><span>✅</span><span className="text-xs font-semibold text-green-700 dark:text-green-400">Result</span></div>
-                        <p className="text-sm text-bark dark:text-green-300 whitespace-pre-wrap font-mono leading-relaxed">{entry.result}</p>
+                        <div className="flex items-center gap-2 mb-2"><span>✅</span><span className="text-xs font-semibold text-green-700 dark:text-green-400">Result</span></div>
+                        <div className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-green-100 dark:border-green-500/10 max-h-[400px] overflow-auto">
+                          <ResultRenderer text={entry.result} />
+                        </div>
                       </div>
                     )}
                     {entry.error && (

@@ -1,8 +1,16 @@
 import { useAgentStore } from '@/store/agentStore'
 
 export default function PlanView() {
-  const { plan, currentStep, status } = useAgentStore()
+  const { plan, currentStep, maxSteps, status } = useAgentStore()
   if (!plan.length) return null
+
+  // Map execution progress (currentStep out of maxSteps) onto the plan items.
+  // e.g. 5 plan items, 50% through execution => first ~2-3 items done.
+  const progressRatio = maxSteps > 0 ? Math.min(currentStep / maxSteps, 1) : 0
+  const completedCount = status === 'completed'
+    ? plan.length
+    : Math.floor(progressRatio * plan.length)
+  const activeIndex = status === 'running' ? Math.min(completedCount, plan.length - 1) : -1
 
   return (
     <div className="bg-cream-50 dark:bg-night-light rounded-2xl border border-cream-300 dark:border-night-lighter p-4 shadow-sm">
@@ -15,9 +23,8 @@ export default function PlanView() {
       </div>
       <ol className="flex flex-col gap-2">
         {plan.map((step, i) => {
-          // Roughly map progress: each plan item corresponds to a portion of steps
-          const done = status === 'completed' || (currentStep > 0 && i < Math.floor((currentStep / Math.max(plan.length, 1))))
-          const active = !done && status === 'running' && i === Math.floor((currentStep / Math.max(plan.length, 1)))
+          const done = i < completedCount
+          const active = !done && i === activeIndex
           return (
             <li key={i} className="flex items-start gap-3">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all

@@ -4,7 +4,7 @@ import { useAgentStore } from '@/store/agentStore'
 import { useHistoryStore } from '@/store/historyStore'
 
 export function useWebSocket() {
-  const { addStep, setScreenshot, setResult, setError, setStatus, setPlan } = useAgentStore()
+  const { addStep, setScreenshot, setResult, setError, setStatus, setPlan, setBrowsers } = useAgentStore()
 
   useEffect(() => {
     agentWS.connect()
@@ -33,6 +33,9 @@ export function useWebSocket() {
           break
         case 'browser_state':
           setScreenshot(event.screenshot, event.url)
+          break
+        case 'browser_states':
+          setBrowsers(event.browsers)
           break
         case 'agent_output':
           setResult(event.result)

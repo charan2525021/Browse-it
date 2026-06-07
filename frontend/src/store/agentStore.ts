@@ -15,6 +15,7 @@ interface AgentState {
   steps: AgentStep[]
   screenshot: string | null
   browserUrl: string
+  browsers: { id: string; screenshot: string; url: string; query: string }[]
   result: string | null
   error: string | null
   setStatus: (s: Partial<AgentStatus>) => void
@@ -22,6 +23,7 @@ interface AgentState {
   setPlan: (plan: string[]) => void
   addStep: (step: AgentStep) => void
   setScreenshot: (screenshot: string, url: string) => void
+  setBrowsers: (browsers: { id: string; screenshot: string; url: string; query: string }[]) => void
   setResult: (result: string) => void
   setError: (error: string) => void
   reset: () => void
@@ -41,6 +43,7 @@ export const useAgentStore = create<AgentState>((set) => ({
   steps: [],
   screenshot: null,
   browserUrl: '',
+  browsers: [],
   result: null,
   error: null,
   setStatus: (s) => set(state => ({
@@ -55,7 +58,8 @@ export const useAgentStore = create<AgentState>((set) => ({
   setPlan: (plan) => set({ plan }),
   addStep: (step) => set(s => ({ steps: [...s.steps, step], currentStep: step.step })),
   setScreenshot: (screenshot, url) => set({ screenshot, browserUrl: url }),
+  setBrowsers: (browsers) => set({ browsers }),
   setResult: (result) => set({ result, isRunning: false, status: 'completed' }),
   setError: (error) => set({ error, isRunning: false, status: 'error' }),
-  reset: () => set({ steps: [], screenshot: null, result: null, error: null, currentStep: 0, browserUrl: '', plan: [] }),
+  reset: () => set({ steps: [], screenshot: null, result: null, error: null, currentStep: 0, browserUrl: '', plan: [], browsers: [] }),
 }))
